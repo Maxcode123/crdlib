@@ -11,6 +11,13 @@ from crdlib.streams.stream import Stream
 class ReactorModel(BaseModel):
     reactor: ChemicalReactor
     reactions: Iterable[ChemicalReaction]
-    energy_balance: EnergyBalance
     mass_balances: Iterable[MassBalance]
     feed: Stream
+
+
+class IsothermalReactorModel(ReactorModel):
+    pass
+
+
+class NonIsothermalReactorModel(ReactorModel):
+    energy_balance: EnergyBalance

@@ -1,8 +1,4 @@
-from pydantic import BaseModel
-
-
-class Equation(BaseModel):
-    pass
+from crdlib.equations.equation import Equation
 
 
 class Balance(Equation):
