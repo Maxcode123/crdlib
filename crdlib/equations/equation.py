@@ -32,7 +32,7 @@ class BinaryFactor(Factor):
         left: Factor,
         binary_operation: BinaryOperation,
         right: Factor,
-            ) -> None:
+    ) -> None:
         self.left = left
         self.right = right
         self.binary_operation = binary_operation

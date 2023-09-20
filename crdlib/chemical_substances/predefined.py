@@ -9,7 +9,7 @@ from crdlib.chemical_substances.substance import (
     ChemicalCompound,
     CriticalProperties,
 )
-from crdlib.exceptions.exceptions import PredefinedSetAttributeError
+from crdlib.chemical_substances.exceptions import PredefinedSetAttributeError
 
 
 class UnsettableClass:
@@ -80,14 +80,15 @@ class PredefinedAtoms(UnsettableClass):
 
 class PredefinedChemicalSubstances(Enum):
     pass
-    HYDROGEN = ChemicalElement(
-        PredefinedAtoms.HYDROGEN,
-        2,
-        CriticalProperties(
-            Temperature(33.19, TemperatureUnit.KELVIN),
-        ),
-    )
+    # HYDROGEN = ChemicalElement(
+    #     PredefinedAtoms.HYDROGEN,
+    #     2,
+    #     CriticalProperties(
+    #         Temperature(33.19, TemperatureUnit.KELVIN),
+    #     ),
+    # )
     # OXYGEN = ChemicalElement(...)
     # WATER = ChemicalCompound(...)
     # METHANE = ChemicalCompound(...)
     # CARBON_MONOXIDE = ChemicalCompound(...)
+    # CARBON_DIOXIDE = ChemicalCompound(...)

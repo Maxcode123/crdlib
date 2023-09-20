@@ -27,6 +27,7 @@ class Balance:
     """
     A balance equation in the Model domain.
     """
+
     pass
 
 
