@@ -45,13 +45,13 @@ class Atom:
     symbol: str
     chemical_group: ChemicalGroup
 
-    def __mul__(self, number_of_atoms: int) -> "ChemicalElement":
-        if not isinstance(number_of_atoms, int) or number_of_atoms <= 0:
+    def __mul__(self, coeff: int) -> "ChemicalElement":
+        if not isinstance(coeff, int) or coeff <= 0:
             raise InvalidChemicalCompoundComponentBinaryOperation(
-                f"cannot multiply {self} with {number_of_atoms}; `number_of_atoms` must"
+                f"cannot multiply {self} with {coeff}; `number_of_atoms` must"
                 " be a positive int. "
             )
-        return ChemicalElement(self, number_of_atoms)
+        return ChemicalElement(self, coeff)
 
     def __lshift__(self, other: ChemicalCompoundComponent) -> "ChemicalCompound":
         if isinstance(other, (Atom, ChemicalElement)):
@@ -68,24 +68,39 @@ class Atom:
 
 @dataclass
 class ChemicalReactionFactors:
-    factors: List[ChemicalReactionFactor]
+    factors: List["ChemicalReactionParticipant"]
+
+    def __init__(self, factors: Iterable[ChemicalReactionFactor]) -> None:
+        _factors = []
+        for f in factors:
+            if isinstance(f, (ChemicalCompound, ChemicalElement)):
+                _factors.append(ChemicalReactionParticipant(f))
+            elif isinstance(f, ChemicalReactionParticipant):
+                _factors.append(f)
+            else:
+                raise TypeError(f"cannot create ChemicalReactionFactors with {f}. ")
+        self.factors = _factors
 
     def __mul__(self, coeff: int) -> "ChemicalReactionFactors":
-        if not isinstance(coeff, int):
+        if not isinstance(coeff, int) or coeff <= 0:
             raise InvalidChemicalReactionFactorBinaryOperation(
                 f"cannot multiply chemical reaction factors with {coeff}; `coeff` must"
                 " be an int. "
             )
         for f in self.factors:
             f *= coeff
+        return self
 
     def __add__(self, other: ChemicalReactionFactor) -> "ChemicalReactionFactors":
-        if isinstance(other, ChemicalSubstance, ChemicalReactionParticipant):
+        if isinstance(other, ChemicalReactionParticipant):
             self.factors.append(other)
+        elif isinstance(other, (ChemicalCompound, ChemicalElement)):
+            self.factors.append(ChemicalReactionParticipant(other))
         else:
             raise InvalidChemicalReactionFactorBinaryOperation(
                 f"cannot add {other} to chemical reaction factors. "
             )
+        return self
 
 
 @dataclass
@@ -102,14 +117,20 @@ class ChemicalSubstance(metaclass=ABCMeta):
     critical_properties: Optional[CriticalProperties]
 
     def __mul__(self, coeff: int) -> "ChemicalReactionParticipant":
-        if not isinstance(coeff, int):
+        if not isinstance(coeff, int) or coeff <= 0:
             raise InvalidChemicalReactionFactorBinaryOperation(
                 f"cannot multiply {self} with {coeff}; `coeff` must be an int. "
             )
         return ChemicalReactionParticipant(self, coeff)
 
     def __add__(self, other: ChemicalReactionFactor) -> ChemicalReactionFactors:
-        return ChemicalReactionFactors([ChemicalReactionParticipant(self, 1), other])
+        if isinstance(other, (Atom, ChemicalElement, ChemicalCompound)):
+            return ChemicalReactionFactors(
+                [ChemicalReactionParticipant(self, 1), other]
+            )
+        raise InvalidChemicalReactionFactorBinaryOperation(
+            f"cannot add {other} to {self}. "
+        )
 
 
 @dataclass
@@ -181,7 +202,7 @@ class ChemicalCompound(ChemicalSubstance):
 @implements(ChemicalReactionFactor)
 class ChemicalReactionParticipant:
     substance: ChemicalSubstance
-    stoichiometric_coefficient: int
+    stoichiometric_coefficient: int = 1
 
     def __mul__(self, coeff: int) -> "ChemicalReactionParticipant":
         self.stoichiometric_coefficient *= coeff

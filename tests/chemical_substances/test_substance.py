@@ -11,6 +11,7 @@ from crdlib.chemical_substances.substance import (
 )
 from crdlib.chemical_substances.exceptions import (
     InvalidChemicalCompoundComponentBinaryOperation,
+    InvalidChemicalReactionFactorBinaryOperation,
 )
 
 
@@ -147,49 +148,52 @@ class TestChemicalCompoundComponents(TestCase):
         self.assertTrue(ChemicalElement(Atoms["H"]) in compound.elements)
 
 
-class TestChemicalReactorFactors(TestCase):
-    def compound(self) -> ChemicalCompound:
-        return ChemicalCompound({ChemicalElement(Atoms.SODIUM, 2), Atoms.OXYGEN})
-
+class TestChemicalReactionFactors(TestCase):
     def test_element_addition_creates_factors(self):
         factors = ChemicalElement(Atoms["H"]) + ChemicalElement(Atoms["O"])
         self.assertTrue(isinstance(factors, ChemicalReactionFactors))
+        self.assertEqual(len(factors.factors), 2)
 
-    def test_invalid_element_addition_raises(self):
-        pass
+    @parameterized.expand(invalid_factors)
+    def test_invalid_element_addition_raises(self, _, factor):
+        with self.assertRaises(InvalidChemicalReactionFactorBinaryOperation):
+            ChemicalElement(Atoms["P"]) + factor
 
     def test_element_multiplication_creates_participant(self):
-        pass
+        participant = ChemicalElement(Atoms["O"]) * 3
+        self.assertEqual(participant.stoichiometric_coefficient, 3)
 
-    def test_invalid_element_multiplication_raises(self):
-        pass
-
-    def test_factor_addition_creates_factors(self):
-        pass
-
-    def test_invalid_factor_addition_raises(self):
-        pass
-
-    def test_factor_multiplication_creates_participant(self):
-        pass
-
-    def test_invalid_factor_multiplication_raises(self):
-        pass
-
-    def test_element_and_factor_addition_creates_factors(self):
-        pass
+    @parameterized.expand(invalid_factors)
+    def test_invalid_element_multiplication_raises(self, _, factor):
+        with self.assertRaises(InvalidChemicalReactionFactorBinaryOperation):
+            ChemicalElement(Atoms["F"]) * factor
 
     def test_factors_multiplication_creates_factors(self):
-        pass
+        factors = ChemicalReactionFactors([ChemicalElement(Atoms["C"])]) * 2
+        self.assertTrue(isinstance(factors, ChemicalReactionFactors))
+        self.assertEqual(factors.factors[0].stoichiometric_coefficient, 2)
 
-    def test_invalid_factors_multiplication_raises(self):
-        pass
+    @parameterized.expand(invalid_factors)
+    def test_invalid_factors_multiplication_raises(self, _, factor):
+        with self.assertRaises(InvalidChemicalReactionFactorBinaryOperation):
+            ChemicalReactionFactors([ChemicalElement(Atoms["C"])]) * factor
 
-    def test_factors_addition_creates_factors(self):
-        pass
+    @parameterized.expand(
+        [
+            ("participant", ChemicalReactionParticipant(ChemicalElement(Atoms["H"]))),
+            ("compound", ChemicalCompound([Atoms["C"], Atoms["H"]])),
+            ("element", ChemicalElement(Atoms["Li"])),
+        ]
+    )
+    def test_factors_addition_creates_factors(self, _, factor):
+        factors = ChemicalReactionFactors([ChemicalElement(Atoms["Si"])]) + factor
+        self.assertTrue(factors, ChemicalReactionFactors)
+        self.assertEqual(len(factors.factors), 2)
 
-    def test_invalid_factors_addition_raises(self):
-        pass
+    @parameterized.expand(invalid_factors)
+    def test_invalid_factors_addition_raises(self, _, factor):
+        with self.assertRaises(InvalidChemicalReactionFactorBinaryOperation):
+            ChemicalReactionFactors([ChemicalElement(Atoms["Si"])]) + factor
 
 
 if __name__ == "__main__":
