@@ -1,14 +1,15 @@
 from typing import Iterable
+from dataclasses import dataclass
+from abc import ABCMeta
 
-from pydantic import BaseModel
-
-from crdlib.chemical_substances.substance import ChemicalSubstance
+from crdlib.chemical_substances.substance import ChemicalReactionFactors
 from crdlib.equations.equation import Term
 
 
-class ChemicalReaction(BaseModel):
-    reactants: Iterable[ChemicalSubstance]
-    products: Iterable[ChemicalSubstance]
+@dataclass
+class ChemicalReaction:
+    reactants: ChemicalReactionFactors
+    products: ChemicalReactionFactors
     reaction_rate: Term
 
     @property
