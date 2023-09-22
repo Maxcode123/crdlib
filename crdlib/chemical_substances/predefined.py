@@ -1,4 +1,5 @@
 from enum import Enum, EnumMeta
+from typing_extensions import override
 
 from crdlib.properties.units import TemperatureUnit, PressureUnit
 from crdlib.properties.properties import Temperature, Pressure, Volume
@@ -22,7 +23,8 @@ _atom_map: dict[str, Atom] = dict()
 
 
 class AtomsMeta(EnumMeta):
-    def __getitem__(self, name: str) -> Atom:
+    @override
+    def __getitem__(self, name: str) -> Atom:  # type: ignore
         return _atom_map[name]
 
 
@@ -38,7 +40,7 @@ class Atoms(Enum, metaclass=AtomsMeta):
 
     @staticmethod
     def get(name: str) -> Atom:
-        return Atoms[name]
+        return Atoms.__getitem__(name)
 
     HYDROGEN = _create_atom(1, 1.0080, "H", ChemicalGroup.NON_METAL)
     HELIUM = _create_atom(2, 4.00260, "He", ChemicalGroup.NOBLE_GAS)

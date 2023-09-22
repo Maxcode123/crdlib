@@ -58,7 +58,7 @@ class Atom:
             return ChemicalCompound([self, other])
         elif isinstance(other, ChemicalCompound):
             elements = other.elements
-            elements.append(self)
+            elements.append(ChemicalElement(self))
             return ChemicalCompound(elements)
         else:
             raise InvalidChemicalCompoundComponentBinaryOperation(
@@ -186,7 +186,10 @@ class ChemicalCompound(ChemicalSubstance):
 
     def __lshift__(self, other: "ChemicalCompoundComponent") -> "ChemicalCompound":
         elements = self.elements
-        if isinstance(other, (Atom, ChemicalElement)):
+        if isinstance(other, Atom):
+            elements.append(ChemicalElement(other))
+            return ChemicalCompound(elements)
+        elif isinstance(other, ChemicalElement):
             elements.append(other)
             return ChemicalCompound(elements)
         elif isinstance(other, ChemicalCompound):
