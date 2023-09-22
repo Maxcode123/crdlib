@@ -7,7 +7,14 @@ from crdlib.chemical_substances.exceptions import (
     InvalidChemicalReactionFactorBinaryOperation,
     InvalidChemicalCompoundComponentBinaryOperation,
 )
-from crdlib.properties.properties import Temperature, Pressure, MolarVolume
+from crdlib.properties.properties import (
+    Temperature,
+    Pressure,
+    MolarVolume,
+    FormationEnthalpy,
+    FormationGibbsFreeEnergy,
+)
+from crdlib.properties.units import TemperatureUnit
 from crdlib.utils.protocols import implements
 
 
@@ -111,13 +118,26 @@ class CriticalProperties:
 
 
 @dataclass
+class StandardFormationProperties:
+    enthalpy: FormationEnthalpy
+    gibbs_free_energy: FormationGibbsFreeEnergy
+    temperature: Temperature = Temperature(25, TemperatureUnit.CELCIUS)
+
+
+@dataclass
 @implements(ChemicalReactionFactor)
 class ChemicalSubstance(metaclass=ABCMeta):
     molecular_weight: float
     critical_properties: Optional[CriticalProperties]
+    standard_formation_properties: Optional[StandardFormationProperties]
 
     def set_critical_properties(self, critical_properties: CriticalProperties) -> None:
         self.critical_properties = critical_properties
+
+    def set_standard_formation_properties(
+        self, standard_formation_properties: StandardFormationProperties
+    ) -> None:
+        self.standard_formation_properties = standard_formation_properties
 
     def __mul__(self, coeff: int) -> "ChemicalReactionParticipant":
         if not isinstance(coeff, int) or coeff <= 0:
@@ -136,7 +156,6 @@ class ChemicalSubstance(metaclass=ABCMeta):
         )
 
 
-@dataclass
 @implements(ChemicalCompoundComponent)
 class ChemicalElement(ChemicalSubstance):
     atom: Atom
@@ -148,10 +167,12 @@ class ChemicalElement(ChemicalSubstance):
         atom: Atom,
         number_of_atoms: int = 1,
         critical_properties: Optional[CriticalProperties] = None,
+        standard_formation_properties: Optional[StandardFormationProperties] = None,
     ) -> None:
         self.atom = atom
         self.number_of_atoms = number_of_atoms
         self.critical_properties = critical_properties
+        self.standard_formation_properties = standard_formation_properties
         self.molecular_weight = self.atom.atomic_mass * number_of_atoms
         self.symbol = atom.symbol + str(number_of_atoms)
 
@@ -176,6 +197,7 @@ class ChemicalCompound(ChemicalSubstance):
         self,
         elements: Iterable[Union[ChemicalElement, Atom]],
         critical_properties: Optional[CriticalProperties] = None,
+        standard_formation_properties: Optional[StandardFormationProperties] = None,
     ) -> None:
         _elements: List[ChemicalElement] = []
         for element in elements:
@@ -185,6 +207,7 @@ class ChemicalCompound(ChemicalSubstance):
                 _elements.append(element)
         self.elements = _elements
         self.critical_properties = critical_properties
+        self.standard_formation_properties = standard_formation_properties
         self.molecular_weight = sum([e.molecular_weight for e in self.elements])
 
     def __lshift__(self, other: "ChemicalCompoundComponent") -> "ChemicalCompound":

@@ -5,13 +5,21 @@ from crdlib.properties.units import (
     PressureUnit,
     LengthUnit,
     AmountUnit,
+    EnergyUnit,
 )
-from crdlib.properties.properties import Temperature, Pressure, MolarVolume
+from crdlib.properties.properties import (
+    Temperature,
+    Pressure,
+    MolarVolume,
+    FormationEnthalpy,
+    FormationGibbsFreeEnergy,
+)
 from crdlib.chemical_substances.substance import (
     ChemicalElement,
     ChemicalCompound,
     ChemicalSubstance,
     CriticalProperties,
+    StandardFormationProperties,
     ChemicalGroup,
     Atom,
 )
@@ -112,8 +120,13 @@ def _create_substance(
     temperature: Temperature,
     pressure: Pressure,
     volume: MolarVolume,
+    enthalpy: FormationGibbsFreeEnergy,
+    gibbs_free_energy: FormationGibbsFreeEnergy,
 ) -> ChemicalSubstance:
     substance.set_critical_properties(CriticalProperties(temperature, pressure, volume))
+    substance.set_standard_formation_properties(
+        StandardFormationProperties(enthalpy, gibbs_free_energy)
+    )
     _substance_map[symbol] = substance
     return substance
 
@@ -134,8 +147,18 @@ class ChemicalSubstances(Enum, metaclass=ChemicalSubstancesMeta):
         temperature: Temperature,
         pressure: Pressure,
         volume: MolarVolume,
+        enthalpy: FormationEnthalpy,
+        gibbs_free_energy: FormationGibbsFreeEnergy,
     ) -> ChemicalSubstance:
-        return _create_substance(substance, symbol, temperature, pressure, volume)
+        return _create_substance(
+            substance,
+            symbol,
+            temperature,
+            pressure,
+            volume,
+            enthalpy,
+            gibbs_free_energy,
+        )
 
     @staticmethod
     def get(name: str) -> ChemicalSubstance:
@@ -147,6 +170,8 @@ class ChemicalSubstances(Enum, metaclass=ChemicalSubstancesMeta):
         Temperature(33.19, TemperatureUnit.KELVIN),
         Pressure(13.13, PressureUnit.BAR),
         MolarVolume(0.064147, (LengthUnit.METER**3) / AmountUnit.KILO_MOL),
+        FormationEnthalpy(0, EnergyUnit.KILO_JOULE / AmountUnit.MOL),
+        FormationGibbsFreeEnergy(0, EnergyUnit.KILO_JOULE / AmountUnit.MOL),
     )
     WATER = _create_substance(
         ChemicalCompound([Atoms.get("H") * 2, Atoms.get("O")]),
@@ -154,6 +179,8 @@ class ChemicalSubstances(Enum, metaclass=ChemicalSubstancesMeta):
         Temperature(647.096, TemperatureUnit.KELVIN),
         Pressure(220.64, PressureUnit.BAR),
         MolarVolume(0.0559472, (LengthUnit.METER**3) / AmountUnit.KILO_MOL),
+        FormationEnthalpy(-241.829, EnergyUnit.KILO_JOULE / AmountUnit.MOL),
+        FormationGibbsFreeEnergy(-228.59, EnergyUnit.KILO_JOULE / AmountUnit.MOL),
     )
     METHANE = _create_substance(
         ChemicalCompound([Atoms.get("C"), Atoms.get("H") * 4]),
@@ -161,6 +188,8 @@ class ChemicalSubstances(Enum, metaclass=ChemicalSubstancesMeta):
         Temperature(190.564, TemperatureUnit.KELVIN),
         Pressure(45.99, PressureUnit.BAR),
         MolarVolume(0.09861, (LengthUnit.METER**3) / AmountUnit.KILO_MOL),
+        FormationEnthalpy(-74.52, EnergyUnit.KILO_JOULE / AmountUnit.MOL),
+        FormationGibbsFreeEnergy(-50.49, EnergyUnit.KILO_JOULE / AmountUnit.MOL),
     )
     CARBON_MONOXIDE = _create_substance(
         ChemicalCompound([Atoms.get("C"), Atoms.get("O")]),
@@ -168,6 +197,8 @@ class ChemicalSubstances(Enum, metaclass=ChemicalSubstancesMeta):
         Temperature(132.92, TemperatureUnit.KELVIN),
         Pressure(34.99, PressureUnit.BAR),
         MolarVolume(0.0944, (LengthUnit.METER**3) / AmountUnit.KILO_MOL),
+        FormationEnthalpy(-110.52, EnergyUnit.KILO_CALORIE / AmountUnit.MOL),
+        FormationGibbsFreeEnergy(-137.27, EnergyUnit.KILO_JOULE / AmountUnit.MOL),
     )
     CARBON_DIOXIDE = _create_substance(
         ChemicalCompound([Atoms.get("C"), Atoms.get("O") * 2]),
@@ -175,4 +206,6 @@ class ChemicalSubstances(Enum, metaclass=ChemicalSubstancesMeta):
         Temperature(304.21, TemperatureUnit.KELVIN),
         Pressure(73.83, PressureUnit.BAR),
         MolarVolume(0.094, (LengthUnit.METER**3) / AmountUnit.KILO_MOL),
+        FormationEnthalpy(-393.509, EnergyUnit.KILO_JOULE / AmountUnit.MOL),
+        FormationGibbsFreeEnergy(-394.359, EnergyUnit.KILO_JOULE / AmountUnit.MOL),
     )
