@@ -632,10 +632,35 @@ class MolarVolumeUnitConverter(CompositePhysicalPropertyUnitConverter):
         to_descriptor: UnitDescriptor,
     ) -> float:
         generic = (LengthUnit**3) / AmountUnit
-        if (not to_descriptor.isinstance(generic)) or (not from_descriptor(generic)):
+        if (not to_descriptor.isinstance(generic)) or (
+            not from_descriptor.isinstance(generic)
+        ):
             raise InvalidUnitConversion(
-                "invalid MolarVolume unit conversion; cannot conver from"
+                "invalid MolarVolume unit conversion; cannot convert from"
                 f" {from_descriptor} to {to_descriptor}. "
+            )
+        from_dimension = CompositeDimension.from_descriptor(from_descriptor)
+        to_dimension = CompositeDimension.from_descriptor(to_descriptor)
+        return value * cls.get_factor(from_dimension, to_dimension)
+
+
+@implements(PhysicalPropertyUnitConverter)
+@register_converter(EnergyUnit / AmountUnit)
+class MolarEnergyUnitConverter(CompositePhysicalPropertyUnitConverter):
+    @classmethod
+    def convert(
+        cls,
+        value: float,
+        from_descriptor: UnitDescriptor,
+        to_descriptor: UnitDescriptor,
+    ) -> float:
+        generic = EnergyUnit / AmountUnit
+        if (not to_descriptor.isinstance(generic)) or (
+            not from_descriptor.isinstance(generic)
+        ):
+            raise InvalidUnitConversion(
+                "invalid MolarEnergy unit conversion; cannot convert from "
+                f"{from_descriptor} to {to_descriptor}. "
             )
         from_dimension = CompositeDimension.from_descriptor(from_descriptor)
         to_dimension = CompositeDimension.from_descriptor(to_descriptor)
