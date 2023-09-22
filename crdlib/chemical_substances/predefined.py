@@ -148,8 +148,31 @@ class ChemicalSubstances(Enum, metaclass=ChemicalSubstancesMeta):
         Pressure(13.13, PressureUnit.BAR),
         MolarVolume(0.064147, (LengthUnit.METER**3) / AmountUnit.KILO_MOL),
     )
-    # OXYGEN = ChemicalElement(...)
-    # WATER = ChemicalCompound(...)
-    # METHANE = ChemicalCompound(...)
-    # CARBON_MONOXIDE = ChemicalCompound(...)
-    # CARBON_DIOXIDE = ChemicalCompound(...)
+    WATER = _create_substance(
+        ChemicalCompound([Atoms.get("H") * 2, Atoms.get("O")]),
+        "H2O",
+        Temperature(647.096, TemperatureUnit.KELVIN),
+        Pressure(220.64, PressureUnit.BAR),
+        MolarVolume(0.0559472, (LengthUnit.METER**3) / AmountUnit.KILO_MOL),
+    )
+    METHANE = _create_substance(
+        ChemicalCompound([Atoms.get("C"), Atoms.get("H") * 4]),
+        "CH4",
+        Temperature(190.564, TemperatureUnit.KELVIN),
+        Pressure(45.99, PressureUnit.BAR),
+        MolarVolume(0.09861, (LengthUnit.METER**3) / AmountUnit.KILO_MOL),
+    )
+    CARBON_MONOXIDE = _create_substance(
+        ChemicalCompound([Atoms.get("C"), Atoms.get("O")]),
+        "CO",
+        Temperature(132.92, TemperatureUnit.KELVIN),
+        Pressure(34.99, PressureUnit.BAR),
+        MolarVolume(0.0944, (LengthUnit.METER**3) / AmountUnit.KILO_MOL),
+    )
+    CARBON_DIOXIDE = _create_substance(
+        ChemicalCompound([Atoms.get("C"), Atoms.get("O") * 2]),
+        "CO2",
+        Temperature(304.21, TemperatureUnit.KELVIN),
+        Pressure(73.83, PressureUnit.BAR),
+        MolarVolume(0.094, (LengthUnit.METER**3) / AmountUnit.KILO_MOL),
+    )
