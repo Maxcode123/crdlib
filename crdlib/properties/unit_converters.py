@@ -614,7 +614,28 @@ class MassRateUnitConverter(CompositePhysicalPropertyUnitConverter):
         ):
             raise InvalidUnitConversion(
                 "invalid MassRate unit conversion; cannot convert from"
-                f" {from_descriptor} to {to_descriptor}"
+                f" {from_descriptor} to {to_descriptor}. "
+            )
+        from_dimension = CompositeDimension.from_descriptor(from_descriptor)
+        to_dimension = CompositeDimension.from_descriptor(to_descriptor)
+        return value * cls.get_factor(from_dimension, to_dimension)
+
+
+@implements(PhysicalPropertyUnitConverter)
+@register_converter((LengthUnit**3) / AmountUnit)
+class MolarVolumeUnitConverter(CompositePhysicalPropertyUnitConverter):
+    @classmethod
+    def convert(
+        cls,
+        value: float,
+        from_descriptor: UnitDescriptor,
+        to_descriptor: UnitDescriptor,
+    ) -> float:
+        generic = (LengthUnit**3) / AmountUnit
+        if (not to_descriptor.isinstance(generic)) or (not from_descriptor(generic)):
+            raise InvalidUnitConversion(
+                "invalid MolarVolume unit conversion; cannot conver from"
+                f" {from_descriptor} to {to_descriptor}. "
             )
         from_dimension = CompositeDimension.from_descriptor(from_descriptor)
         to_dimension = CompositeDimension.from_descriptor(to_descriptor)

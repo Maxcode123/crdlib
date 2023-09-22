@@ -156,6 +156,10 @@ class MassRate(CompositePhysicalProperty):
     generic_descriptor = MassUnit / TimeUnit
 
 
+class MolarVolume(CompositePhysicalProperty):
+    generic_descriptor = (LengthUnit**3) / AmountUnit
+
+
 class VolumetricRate(PhysicalProperty):
     pass
 
