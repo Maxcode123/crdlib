@@ -1,11 +1,16 @@
 from enum import Enum, EnumMeta
-from typing_extensions import override
 
-from crdlib.properties.units import TemperatureUnit, PressureUnit
-from crdlib.properties.properties import Temperature, Pressure, Volume
+from crdlib.properties.units import (
+    TemperatureUnit,
+    PressureUnit,
+    LengthUnit,
+    AmountUnit,
+)
+from crdlib.properties.properties import Temperature, Pressure, MolarVolume
 from crdlib.chemical_substances.substance import (
     ChemicalElement,
     ChemicalCompound,
+    ChemicalSubstance,
     CriticalProperties,
     ChemicalGroup,
     Atom,
@@ -23,7 +28,6 @@ _atom_map: dict[str, Atom] = dict()
 
 
 class AtomsMeta(EnumMeta):
-    @override
     def __getitem__(self, name: str) -> Atom:  # type: ignore
         return _atom_map[name]
 
@@ -102,15 +106,48 @@ class Atoms(Enum, metaclass=AtomsMeta):
     TANTALUM = _create_atom(73, 180.9479, "Ta", ChemicalGroup.TRANSITION_METAL)
 
 
-class ChemicalSubstances(Enum):
-    pass
-    # HYDROGEN = ChemicalElement(
-    #     PredefinedAtoms.HYDROGEN,
-    #     2,
-    #     CriticalProperties(
-    #         Temperature(33.19, TemperatureUnit.KELVIN),
-    #     ),
-    # )
+def _create_substance(
+    substance: ChemicalSubstance,
+    symbol: str,
+    temperature: Temperature,
+    pressure: Pressure,
+    volume: MolarVolume,
+) -> ChemicalSubstance:
+    substance.set_critical_properties(CriticalProperties(temperature, pressure, volume))
+    _substance_map[symbol] = substance
+    return substance
+
+
+_substance_map: dict[str, ChemicalSubstance] = dict()
+
+
+class ChemicalSubstancesMeta(EnumMeta):
+    def __getitem__(self, name: str) -> ChemicalSubstance:  # type: ignore
+        return _substance_map[name]
+
+
+class ChemicalSubstances(Enum, metaclass=ChemicalSubstancesMeta):
+    @staticmethod
+    def create(
+        substance: ChemicalSubstance,
+        symbol: str,
+        temperature: Temperature,
+        pressure: Pressure,
+        volume: MolarVolume,
+    ) -> ChemicalSubstance:
+        return _create_substance(substance, symbol, temperature, pressure, volume)
+
+    @staticmethod
+    def get(name: str) -> ChemicalSubstance:
+        return ChemicalSubstances.__getitem__(name)
+
+    HYDROGEN = _create_substance(
+        ChemicalElement(Atoms.get("H"), 2),
+        "H2",
+        Temperature(33.19, TemperatureUnit.KELVIN),
+        Pressure(13.13, PressureUnit.BAR),
+        MolarVolume(0.064147, (LengthUnit.METER**3) / AmountUnit.KILO_MOL),
+    )
     # OXYGEN = ChemicalElement(...)
     # WATER = ChemicalCompound(...)
     # METHANE = ChemicalCompound(...)

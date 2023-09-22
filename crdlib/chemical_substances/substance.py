@@ -7,7 +7,7 @@ from crdlib.chemical_substances.exceptions import (
     InvalidChemicalReactionFactorBinaryOperation,
     InvalidChemicalCompoundComponentBinaryOperation,
 )
-from crdlib.properties.properties import Temperature, Pressure, Volume
+from crdlib.properties.properties import Temperature, Pressure, MolarVolume
 from crdlib.utils.protocols import implements
 
 
@@ -107,7 +107,7 @@ class ChemicalReactionFactors:
 class CriticalProperties:
     temperature: Temperature
     pressure: Pressure
-    volume: Volume
+    volume: MolarVolume
 
 
 @dataclass
@@ -115,6 +115,9 @@ class CriticalProperties:
 class ChemicalSubstance(metaclass=ABCMeta):
     molecular_weight: float
     critical_properties: Optional[CriticalProperties]
+
+    def set_critical_properties(self, critical_properties: CriticalProperties) -> None:
+        self.critical_properties = critical_properties
 
     def __mul__(self, coeff: int) -> "ChemicalReactionParticipant":
         if not isinstance(coeff, int) or coeff <= 0:
