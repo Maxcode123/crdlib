@@ -1,10 +1,18 @@
 CONFIG=./pyproject.toml
+TEST=python -m unittest -v
+FORMATTER=black
+TYPE_CHECKER=mypy
 
-test:
-	python -m unittest -v
+test: unit-test integration-test
+
+unit-test:
+	$(TEST) tests.unit
+
+integration-test:
+	$(TEST) tests.integration
 
 format:
-	black --config $(CONFIG) ./
+	$(FORMATTER) --config $(CONFIG) ./
 
 static-analysis:
-	mypy --config-file $(CONFIG) ./
+	$(TYPE_CHECKER) --config-file $(CONFIG) ./
