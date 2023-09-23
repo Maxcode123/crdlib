@@ -168,6 +168,12 @@ FormationEnthalpy: TypeAlias = MolarEnergy
 FormationGibbsFreeEnergy: TypeAlias = MolarEnergy
 
 
+class GasConstant(CompositePhysicalProperty):
+    generic_descriptor = (
+        MassUnit * (LengthUnit**2) / (TimeUnit**2) / TemperatureUnit / AmountUnit
+    )
+
+
 class VolumetricRate(PhysicalProperty):
     pass
 
