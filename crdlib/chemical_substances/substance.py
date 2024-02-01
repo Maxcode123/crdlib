@@ -14,7 +14,7 @@ from crdlib.properties.properties import (
     FormationEnthalpy,
     FormationGibbsFreeEnergy,
 )
-from crdlib.properties.units import TemperatureUnit
+from crdlib.properties.units.units import TemperatureUnit
 from crdlib.utils.protocols import implements
 
 

@@ -1,11 +1,7 @@
 from abc import ABCMeta, abstractmethod
 from typing import Protocol, Type
 
-from crdlib.properties.units import (
-    UnitDescriptor,
-    GenericUnitDescriptor,
-    Dimension,
-    CompositeDimension,
+from crdlib.properties.units.units import (
     MeasurementUnit,
     TemperatureUnit,
     PressureUnit,
@@ -14,6 +10,12 @@ from crdlib.properties.units import (
     AmountUnit,
     TimeUnit,
     EnergyUnit,
+)
+from crdlib.properties.units.descriptors import (
+    UnitDescriptor,
+    GenericUnitDescriptor,
+    Dimension,
+    CompositeDimension,
 )
 from crdlib.properties.exceptions import InvalidUnitConversion, UndefinedConverter
 from crdlib.utils.protocols import implements
@@ -268,7 +270,7 @@ class TemperatureUnitConverter:
 
 
 @register_converter(PressureUnit)
-class PressureUnitConverter(AbsoluteUnitConverter):
+class AliasedPressureUnitConverter(AbsoluteUnitConverter):
     BAR_TO_PSI = 14.5038
     BAR_TO_PASCAL = 100_000
     BAR_TO_KILOPASCAL = 100
@@ -692,6 +694,29 @@ class GasConstantUnitConverter(CompositePhysicalPropertyUnitConverter):
             raise InvalidUnitConversion(
                 "invalid GasConstant unit conversion; cannot convert from "
                 f"{from_descriptor} to {to_descriptor}. "
+            )
+        from_dimension = CompositeDimension.from_descriptor(from_descriptor)
+        to_dimension = CompositeDimension.from_descriptor(to_descriptor)
+        return value * cls.get_factor(from_dimension, to_dimension)
+
+
+@implements(PhysicalPropertyUnitConverter)
+@register_converter(MassUnit / LengthUnit / (TimeUnit**2))
+class PressureUnitConverter(CompositePhysicalPropertyUnitConverter):
+    @classmethod
+    def convert(
+        cls,
+        value: float,
+        from_descriptor: UnitDescriptor,
+        to_descriptor: UnitDescriptor,
+    ) -> float:
+        generic = MassUnit / LengthUnit / (TimeUnit**2)
+        if (not to_descriptor.isinstance(generic)) or (
+            not from_descriptor.isinstance(generic)
+        ):
+            raise InvalidUnitConversion(
+                "invalid Pressure unit conversion; cannot confer from "
+                f"{from_descriptor} to {to_descriptor}."
             )
         from_dimension = CompositeDimension.from_descriptor(from_descriptor)
         to_dimension = CompositeDimension.from_descriptor(to_descriptor)

@@ -25,7 +25,7 @@ def _create_coefficient(
     return _coefficient_map[symbol]
 
 
-_coefficient_map = dict[str, ThermalCapacityCoefficient] = dict()
+_coefficient_map: dict[str, ThermalCapacityCoefficient] = dict()
 
 
 class ThermalCapacityCoefficientMeta(EnumMeta):

@@ -3,15 +3,17 @@ from typing import Type
 
 from parameterized import parameterized
 
-from crdlib.properties.units import (
-    Dimension,
-    CompositeDimension,
-    GenericDimension,
+from crdlib.properties.units.units import (
     MeasurementUnit,
     TemperatureUnit,
     PressureUnit,
     LengthUnit,
     MassUnit,
+)
+from crdlib.properties.units.descriptors import (
+    Dimension,
+    CompositeDimension,
+    GenericDimension,
 )
 from crdlib.properties.exceptions import InvalidUnitDescriptorBinaryOperation
 
@@ -90,7 +92,7 @@ class TestDimensions(TestUnitDescriptors):
     def test_power(self):
         dimension = self.create(TemperatureUnit.KELVIN) ** 3
         self.assertEqual(str(dimension), "(K) ^ 3")
-        self.assertGreaterEqual(dimension.power, 3)
+        self.assertEqual(dimension.power, 3)
 
     def test_multiple_operations(self):
         composite = (

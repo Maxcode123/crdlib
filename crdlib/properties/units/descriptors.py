@@ -206,68 +206,29 @@ class MeasurementUnit(Enum, metaclass=MeasurementUnitMeta):
 MeasurementUnitType: TypeAlias = MeasurementUnitMeta
 
 
-class NonDimensionalUnit(MeasurementUnit):
+class AliasedMeasurementUnit(MeasurementUnit):
     """
-    This enum is used to denote physical quantities that do not have a unit of
-    measurement.
+    Base class for common composite units of physical quantities.
+
+    Subclasses of `MeasurementUnit` represent only primitive physical quantities.
+    However, many common physical properties have composite units (e.g. pressure, force,
+    energy, etc), thus subclasses of this class alias composite units as primitive ones.
+
+    Only very common composite units should be aliased.
+
+    e.g. you can create an alias for pressure units, instead of using mass * length / (
+        time^2) units.
     """
 
-    NON_DIMENSIONAL = ""
-
-
-class TemperatureUnit(MeasurementUnit):
-    CELCIUS = "°C"
-    KELVIN = "K"
-    FAHRENHEIT = "°F"
-    RANKINE = "°R"
-
-
-class PressureUnit(MeasurementUnit):
-    MILLI_BAR = "mbar"
-    BAR = "bar"
-    PSI = "psi"
-    PASCAL = "Pa"
-    KILO_PASCAL = "kPa"
-
-
-class LengthUnit(MeasurementUnit):
-    MILLI_METER = "mm"
-    CENTI_METER = "cm"
-    METER = "m"
-    KILO_METER = "km"
-    INCH = "in"
-    FOOT = "ft"
-
-
-class MassUnit(MeasurementUnit):
-    MILLI_GRAM = "mg"
-    GRAM = "g"
-    KILO_GRAM = "kg"
-    METRIC_TONNE = "MT"
-    POUND = "lb"
-
-
-class AmountUnit(MeasurementUnit):
-    MOL = "mol"
-    KILO_MOL = "kmol"
-
-
-class TimeUnit(MeasurementUnit):
-    MILLI_SECOND = "ms"
-    SECOND = "s"
-    MINUTE = "min"
-    HOUR = "hr"
-    DAY = "d"
-
-
-class EnergyUnit(MeasurementUnit):
-    JOULE = "J"
-    KILO_JOULE = "kJ"
-    MEGA_JOULE = "MJ"
-    GIGA_JOULE = "GJ"
-    CALORIE = "cal"
-    KILO_CALORIE = "kcal"
-    BTU = "Btu"
+    @staticmethod
+    def from_descriptor(descriptor: UnitDescriptor) -> MeasurementUnit:
+        if isinstance(descriptor, Dimension):
+            return descriptor.unit
+        elif isinstance(descriptor, AliasedMeasurementUnit):
+            return descriptor
+        raise WrongUnitDescriptorType(
+            f"cannot create AliasedMeasurementUnit from descriptor {descriptor}"
+        )
 
 
 @dataclass
