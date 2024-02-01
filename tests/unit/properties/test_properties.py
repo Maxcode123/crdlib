@@ -23,16 +23,6 @@ class TestPhysicalProperty(TestCase):
         R = K.to_unit(TemperatureUnit.RANKINE)
         self.assertEqual(R.value, 1800)
 
-    def test_to_unit_bar_to_Pa(self):
-        P1 = Pressure(2, PressureUnit.BAR)
-        P2 = P1.to_unit(PressureUnit.PASCAL)
-        self.assertEqual(P2.value, 200_000)
-
-    def test_to_unit_kPa_to_psi(self):
-        P1 = Pressure(200, PressureUnit.KILO_PASCAL)
-        P2 = P1.to_unit(PressureUnit.PSI)
-        self.assertAlmostEqual(P2.value, 2 * 14.5038, 4)
-
     def test_to_unit_raises(self):
         with self.assertRaises(InvalidUnitConversion):
             Temperature(0, TemperatureUnit.CELCIUS).to_unit(PressureUnit.BAR)
@@ -70,6 +60,18 @@ class TestCompositePhysicalProperty(TestCase):
         M1 = MassRate(10, Dimension(MassUnit.KILO_GRAM) / Dimension(TimeUnit.HOUR))
         M2 = M1.to_unit(Dimension(MassUnit.METRIC_TONNE) / Dimension(TimeUnit.DAY))
         self.assertAlmostEqual(M2.value, 10 / 1_000 * 24, 2)
+
+
+class TestAliasedCompositePhysicalProperty(TestCase):
+    def test_to_unit_bar_to_Pa(self):
+        P1 = Pressure(2, PressureUnit.BAR)
+        P2 = P1.to_unit(PressureUnit.PASCAL)
+        self.assertEqual(P2.value, 200_000)
+
+    def test_to_unit_kPa_to_psi(self):
+        P1 = Pressure(200, PressureUnit.KILO_PASCAL)
+        P2 = P1.to_unit(PressureUnit.PSI)
+        self.assertAlmostEqual(P2.value, 2 * 14.5038, 4)
 
 
 if __name__ == "__main__":

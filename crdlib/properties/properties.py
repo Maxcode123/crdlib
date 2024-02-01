@@ -3,7 +3,6 @@ from typing import Type, ClassVar, TypeAlias
 from abc import ABCMeta, abstractmethod
 
 from crdlib.properties.units.units import (
-    MeasurementUnit,
     TemperatureUnit,
     PressureUnit,
     LengthUnit,
@@ -13,10 +12,12 @@ from crdlib.properties.units.units import (
     EnergyUnit,
 )
 from crdlib.properties.units.descriptors import (
+    MeasurementUnit,
     Dimension,
     CompositeDimension,
     UnitDescriptor,
     GenericUnitDescriptor,
+    AliasedMeasurementUnit,
 )
 from crdlib.properties.units.converters import (
     get_converter,
@@ -122,12 +123,28 @@ class CompositePhysicalProperty(AbstractPhysicalProperty):
             )
 
 
+@dataclass
+class AliasedCompositePhysicalProperty(AbstractPhysicalProperty):
+    """A physical property with an aliased generic unit descriptor."""
+
+    base_units_generic_descriptor: ClassVar[GenericUnitDescriptor]
+
+    def __init__(self, value: float, unit: UnitDescriptor) -> None:
+        self.value = value
+        try:
+            self.unit_descriptor = AliasedMeasurementUnit.from_descriptor(unit)
+        except WrongUnitDescriptorType:
+            raise WrongUnitDescriptorType(
+                f"cannot instantiate {self.__class__.__name__} with unit: {unit}"
+            )
+
+    # TODO: implement
+    def to_base_units() -> CompositePhysicalProperty:
+        ...
+
+
 class Temperature(PhysicalProperty):
     generic_descriptor = TemperatureUnit
-
-
-class Pressure(PhysicalProperty):
-    generic_descriptor = PressureUnit
 
 
 class Length(PhysicalProperty):
@@ -146,12 +163,18 @@ class Time(PhysicalProperty):
     generic_descriptor = TimeUnit
 
 
-class Energy(PhysicalProperty):
-    generic_descriptor = EnergyUnit
-
-
 class Volume(ExponentPhysicalProperty):
     generic_descriptor = LengthUnit**3
+
+
+class Pressure(AliasedCompositePhysicalProperty):
+    generic_descriptor = PressureUnit
+    base_units_generic_descriptor = MassUnit / LengthUnit / (TimeUnit**2)
+
+
+class Energy(AliasedCompositePhysicalProperty):
+    generic_descriptor = EnergyUnit
+    base_units_generic_descriptor = MassUnit * (LengthUnit**2) / (TimeUnit**2)
 
 
 class MassRate(CompositePhysicalProperty):
