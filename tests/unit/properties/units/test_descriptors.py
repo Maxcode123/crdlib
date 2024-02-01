@@ -92,7 +92,7 @@ class TestDimensions(TestUnitDescriptors):
     def test_power(self):
         dimension = self.create(TemperatureUnit.KELVIN) ** 3
         self.assertEqual(str(dimension), "(K) ^ 3")
-        self.assertGreaterEqual(dimension.power, 3)
+        self.assertEqual(dimension.power, 3)
 
     def test_multiple_operations(self):
         composite = (
