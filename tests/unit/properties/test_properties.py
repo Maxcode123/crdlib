@@ -73,6 +73,24 @@ class TestAliasedCompositePhysicalProperty(TestCase):
         P2 = P1.to_unit(PressureUnit.PSI)
         self.assertAlmostEqual(P2.value, 2 * 14.5038, 4)
 
+    def test_to_base_units(self):
+        P1 = Pressure(15, PressureUnit.BAR)
+        P2 = P1.to_base_units()
+        self.assertEqual(
+            P2.unit_descriptor,
+            MassUnit.KILO_GRAM / LengthUnit.METER / (TimeUnit.SECOND**2),
+        )
+        self.assertEqual(P2.value, 15 * 100_000)
+
+    def test_to_base_units_from_base_units(self):
+        P1 = Pressure(200_000, PressureUnit.PASCAL)  # Pa is equivalent to base units
+        P2 = P1.to_base_units()
+        self.assertEqual(
+            P2.unit_descriptor,
+            MassUnit.KILO_GRAM / LengthUnit.METER / (TimeUnit.SECOND**2),
+        )
+        self.assertEqual(P2.value, 200_000)
+
 
 if __name__ == "__main__":
     main()

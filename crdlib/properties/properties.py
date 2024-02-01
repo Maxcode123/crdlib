@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from typing import Type, ClassVar, TypeAlias
+from typing_extensions import Self
 from abc import ABCMeta, abstractmethod
 
 from crdlib.properties.units.units import (
@@ -39,7 +40,7 @@ class AbstractPhysicalProperty(metaclass=ABCMeta):
     def __init__(self, value: float, unit: UnitDescriptor) -> None:
         ...
 
-    def to_unit(self, unit: UnitDescriptor) -> "AbstractPhysicalProperty":
+    def to_unit(self, unit: UnitDescriptor) -> Self:
         """
         Create a new PhysicalProperty object with specified unit.
         """
@@ -48,7 +49,7 @@ class AbstractPhysicalProperty(metaclass=ABCMeta):
     @classmethod
     def from_physical_property(
         cls, physical_property: "AbstractPhysicalProperty", to_unit: UnitDescriptor
-    ) -> "AbstractPhysicalProperty":
+    ) -> Self:
         """
         Create a new PhysicalProperty object with specified unit from given object.
         """
@@ -128,6 +129,7 @@ class AliasedCompositePhysicalProperty(AbstractPhysicalProperty):
     """A physical property with an aliased generic unit descriptor."""
 
     base_units_generic_descriptor: ClassVar[GenericUnitDescriptor]
+    reference_unit_mapping: ClassVar[dict[str, UnitDescriptor]]
 
     def __init__(self, value: float, unit: UnitDescriptor) -> None:
         self.value = value
@@ -138,9 +140,15 @@ class AliasedCompositePhysicalProperty(AbstractPhysicalProperty):
                 f"cannot instantiate {self.__class__.__name__} with unit: {unit}"
             )
 
-    # TODO: implement
-    def to_base_units() -> CompositePhysicalProperty:
-        ...
+    def to_base_units(self) -> CompositePhysicalProperty:
+        """
+        Create a new `CompositePhyicalProperty` from this aliased property by converting
+        to composite base units.
+        """
+        return CompositePhysicalProperty(
+            value=self.to_unit(self.reference_unit_mapping["alias"]).value,
+            unit=self.reference_unit_mapping["composite"],
+        )
 
 
 class Temperature(PhysicalProperty):
@@ -170,11 +178,21 @@ class Volume(ExponentPhysicalProperty):
 class Pressure(AliasedCompositePhysicalProperty):
     generic_descriptor = PressureUnit
     base_units_generic_descriptor = MassUnit / LengthUnit / (TimeUnit**2)
+    reference_unit_mapping = {
+        "alias": PressureUnit.PASCAL,
+        "composite": MassUnit.KILO_GRAM / LengthUnit.METER / (TimeUnit.SECOND**2),
+    }
 
 
 class Energy(AliasedCompositePhysicalProperty):
     generic_descriptor = EnergyUnit
     base_units_generic_descriptor = MassUnit * (LengthUnit**2) / (TimeUnit**2)
+    reference_unit_mapping = {
+        "alias": EnergyUnit.JOULE,
+        "composite": MassUnit.KILO_GRAM
+        * (LengthUnit.METER**2)
+        / (TimeUnit.SECOND**2),
+    }
 
 
 class MassRate(CompositePhysicalProperty):
