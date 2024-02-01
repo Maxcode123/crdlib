@@ -270,6 +270,15 @@ class EnergyUnit(MeasurementUnit):
     BTU = "Btu"
 
 
+SI_UNITS: dict[MeasurementUnitType, MeasurementUnit] = {
+    TemperatureUnit: TemperatureUnit.KELVIN,
+    LengthUnit: LengthUnit.METER,
+    MassUnit: MassUnit.KILO_GRAM,
+    AmountUnit: AmountUnit.MOL,
+    TimeUnit: TimeUnit.SECOND,
+}
+
+
 @dataclass
 @implements(GenericUnitDescriptor)
 class GenericDimension:
