@@ -11,6 +11,7 @@ from crdlib.properties.units.units import (
     AmountUnit,
     TimeUnit,
     EnergyUnit,
+    SI_UNITS,
 )
 from crdlib.properties.units.descriptors import (
     MeasurementUnit,
@@ -39,6 +40,10 @@ class AbstractPhysicalProperty(metaclass=ABCMeta):
     @abstractmethod
     def __init__(self, value: float, unit: UnitDescriptor) -> None:
         ...
+
+    @abstractmethod
+    def to_si(self) -> Self:
+        """Create a new PhysicalProperty object with SI units."""
 
     def to_unit(self, unit: UnitDescriptor) -> Self:
         """
@@ -88,6 +93,9 @@ class PhysicalProperty(AbstractPhysicalProperty):
                 f"cannot instantiate {self.__class__.__name__} with unit: {unit}. "
             )
 
+    def to_si(self) -> "PhysicalProperty":
+        return self.to_unit(SI_UNITS[self.generic_descriptor])
+
 
 @dataclass
 class ExponentPhysicalProperty(AbstractPhysicalProperty):
@@ -106,6 +114,12 @@ class ExponentPhysicalProperty(AbstractPhysicalProperty):
             raise WrongUnitDescriptorType(
                 f"cannot instantiate {self.__class__.__name__} with unit: {unit}. "
             )
+
+    def to_si(self) -> "ExponentPhysicalProperty":
+        return self.to_unit(
+            SI_UNITS[self.generic_descriptor.unit_type]
+            ** Dimension.from_descriptor(self.unit_descriptor).power
+        )
 
 
 @dataclass
@@ -134,6 +148,9 @@ class AliasedPhysicalProperty(AbstractPhysicalProperty):
             unit=self.reference_unit_mapping["composite"],
         )
 
+    def to_si(self) -> "CompositePhysicalProperty":
+        return self.to_base_units()
+
 
 @dataclass
 class CompositePhysicalProperty(AbstractPhysicalProperty):
@@ -149,6 +166,16 @@ class CompositePhysicalProperty(AbstractPhysicalProperty):
             raise WrongUnitDescriptorType(
                 f"cannot instantiate {self.__class__.__name__} with unit: {unit}"
             )
+
+    def to_si(self) -> "CompositePhysicalProperty":
+        numerator = list(map(self._to_si_dimension, self.unit_descriptor.numerator))
+        denominator = list(map(self._to_si_dimension, self.unit_descriptor.denominator))
+        unit = CompositeDimension(numerator, denominator)
+        return self.to_unit(unit)
+
+    @staticmethod
+    def _to_si_dimension(dimension: Dimension) -> Dimension:
+        return Dimension(SI_UNITS[type(dimension.unit)])
 
 
 @dataclass
@@ -179,6 +206,9 @@ class AliasedCompositePhysicalProperty(AbstractPhysicalProperty):
             value=self.to_unit(self.reference_unit_mapping["alias"]).value,
             unit=self.reference_unit_mapping["composite"],
         )
+
+    def to_si(self) -> CompositePhysicalProperty:
+        return self.to_base_units()
 
 
 class Temperature(PhysicalProperty):
