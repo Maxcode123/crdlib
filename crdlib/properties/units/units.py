@@ -1,4 +1,8 @@
-from crdlib.properties.units.descriptors import MeasurementUnit, MeasurementUnitType
+from crdlib.properties.units.descriptors import (
+    MeasurementUnit,
+    MeasurementUnitType,
+    AliasedMeasurementUnit,
+)
 
 
 class NonDimensionalUnit(MeasurementUnit):
@@ -15,14 +19,6 @@ class TemperatureUnit(MeasurementUnit):
     KELVIN = "K"
     FAHRENHEIT = "°F"
     RANKINE = "°R"
-
-
-class PressureUnit(MeasurementUnit):
-    MILLI_BAR = "mbar"
-    BAR = "bar"
-    PSI = "psi"
-    PASCAL = "Pa"
-    KILO_PASCAL = "kPa"
 
 
 class LengthUnit(MeasurementUnit):
@@ -55,7 +51,15 @@ class TimeUnit(MeasurementUnit):
     DAY = "d"
 
 
-class EnergyUnit(MeasurementUnit):
+class PressureUnit(AliasedMeasurementUnit):
+    MILLI_BAR = "mbar"
+    BAR = "bar"
+    PSI = "psi"
+    PASCAL = "Pa"
+    KILO_PASCAL = "kPa"
+
+
+class EnergyUnit(AliasedMeasurementUnit):
     JOULE = "J"
     KILO_JOULE = "kJ"
     MEGA_JOULE = "MJ"
