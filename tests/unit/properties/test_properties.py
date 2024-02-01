@@ -1,13 +1,13 @@
 from unittest import TestCase, main
 
-from crdlib.properties.units import (
+from crdlib.properties.units.units import (
     TemperatureUnit,
     PressureUnit,
     LengthUnit,
     MassUnit,
     TimeUnit,
-    Dimension,
 )
+from crdlib.properties.units.descriptors import Dimension
 from crdlib.properties.properties import Temperature, Pressure, Volume, MassRate
 from crdlib.properties.exceptions import InvalidUnitConversion
 

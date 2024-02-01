@@ -2,12 +2,8 @@ from dataclasses import dataclass
 from typing import Type, ClassVar, TypeAlias
 from abc import ABCMeta, abstractmethod
 
-from crdlib.properties.units import (
-    Dimension,
+from crdlib.properties.units.units import (
     MeasurementUnit,
-    CompositeDimension,
-    UnitDescriptor,
-    GenericUnitDescriptor,
     TemperatureUnit,
     PressureUnit,
     LengthUnit,
@@ -16,7 +12,13 @@ from crdlib.properties.units import (
     TimeUnit,
     EnergyUnit,
 )
-from crdlib.properties.unit_converters import (
+from crdlib.properties.units.descriptors import (
+    Dimension,
+    CompositeDimension,
+    UnitDescriptor,
+    GenericUnitDescriptor,
+)
+from crdlib.properties.units.converters import (
     get_converter,
     PhysicalPropertyUnitConverter,
 )

@@ -3,15 +3,17 @@ from typing import Type
 
 from parameterized import parameterized
 
-from crdlib.properties.units import (
-    Dimension,
-    CompositeDimension,
-    GenericDimension,
+from crdlib.properties.units.units import (
     MeasurementUnit,
     TemperatureUnit,
     PressureUnit,
     LengthUnit,
     MassUnit,
+)
+from crdlib.properties.units.descriptors import (
+    Dimension,
+    CompositeDimension,
+    GenericDimension,
 )
 from crdlib.properties.exceptions import InvalidUnitDescriptorBinaryOperation
 

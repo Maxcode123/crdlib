@@ -1,11 +1,7 @@
 from abc import ABCMeta, abstractmethod
 from typing import Protocol, Type
 
-from crdlib.properties.units import (
-    UnitDescriptor,
-    GenericUnitDescriptor,
-    Dimension,
-    CompositeDimension,
+from crdlib.properties.units.units import (
     MeasurementUnit,
     TemperatureUnit,
     PressureUnit,
@@ -14,6 +10,12 @@ from crdlib.properties.units import (
     AmountUnit,
     TimeUnit,
     EnergyUnit,
+)
+from crdlib.properties.units.descriptors import (
+    UnitDescriptor,
+    GenericUnitDescriptor,
+    Dimension,
+    CompositeDimension,
 )
 from crdlib.properties.exceptions import InvalidUnitConversion, UndefinedConverter
 from crdlib.utils.protocols import implements

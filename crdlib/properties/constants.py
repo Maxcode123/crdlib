@@ -1,5 +1,5 @@
 from crdlib.properties.properties import GasConstant
-from crdlib.properties.units import (
+from crdlib.properties.units.units import (
     MassUnit,
     LengthUnit,
     TimeUnit,

@@ -1,6 +1,6 @@
 from enum import Enum, EnumMeta
 
-from crdlib.properties.units import (
+from crdlib.properties.units.units import (
     TemperatureUnit,
     PressureUnit,
     LengthUnit,
