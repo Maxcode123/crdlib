@@ -206,6 +206,31 @@ class MeasurementUnit(Enum, metaclass=MeasurementUnitMeta):
 MeasurementUnitType: TypeAlias = MeasurementUnitMeta
 
 
+class AliasedMeasurementUnit(MeasurementUnit):
+    """
+    Base class for common composite units of physical quantities.
+
+    Subclasses of `MeasurementUnit` represent only primitive physical quantities.
+    However, many common physical properties have composite units (e.g. pressure, force,
+    energy, etc), thus subclasses of this class alias composite units as primitive ones.
+
+    Only very common composite units should be aliased.
+
+    e.g. you can create an alias for pressure units, instead of using mass * length / (
+        time^2) units.
+    """
+
+    @staticmethod
+    def from_descriptor(descriptor: UnitDescriptor) -> MeasurementUnit:
+        if isinstance(descriptor, Dimension):
+            return descriptor.unit
+        elif isinstance(descriptor, AliasedMeasurementUnit):
+            return descriptor
+        raise WrongUnitDescriptorType(
+            f"cannot create AliasedMeasurementUnit from descriptor {descriptor}"
+        )
+
+
 @dataclass
 @implements(GenericUnitDescriptor)
 class GenericDimension:
