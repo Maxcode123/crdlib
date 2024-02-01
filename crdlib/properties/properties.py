@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Type, ClassVar
+from typing import Type, ClassVar, TypeAlias
 from abc import ABCMeta, abstractmethod
 
 from crdlib.properties.units import (
@@ -154,6 +154,28 @@ class Volume(ExponentPhysicalProperty):
 
 class MassRate(CompositePhysicalProperty):
     generic_descriptor = MassUnit / TimeUnit
+
+
+class MolarVolume(CompositePhysicalProperty):
+    generic_descriptor = (LengthUnit**3) / AmountUnit
+
+
+class MolarEnergy(CompositePhysicalProperty):
+    generic_descriptor = EnergyUnit / AmountUnit
+
+
+FormationEnthalpy: TypeAlias = MolarEnergy
+FormationGibbsFreeEnergy: TypeAlias = MolarEnergy
+
+
+class GasConstant(CompositePhysicalProperty):
+    generic_descriptor = (
+        MassUnit * (LengthUnit**2) / (TimeUnit**2) / TemperatureUnit / AmountUnit
+    )
+
+
+class ThermalCapacity(CompositePhysicalProperty):
+    generic_descriptor = EnergyUnit / AmountUnit / TemperatureUnit
 
 
 class VolumetricRate(PhysicalProperty):
