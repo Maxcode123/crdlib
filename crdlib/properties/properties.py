@@ -172,8 +172,8 @@ class AliasedCompositePhysicalProperty(AbstractPhysicalProperty):
 
     def to_base_units(self) -> "CompositePhysicalProperty":
         """
-        Create a new `CompositePhyicalProperty` from this aliased property by converting
-        to composite base units.
+        Create a new `CompositePhysicalProperty` from this aliased property by
+        converting to composite base units.
         """
         return CompositePhysicalProperty(
             value=self.to_unit(self.reference_unit_mapping["alias"]).value,
