@@ -214,13 +214,3 @@ class ChemicalSubstances(Enum, metaclass=ChemicalSubstancesMeta):
         FormationEnthalpy(-393.509, EnergyUnit.KILO_JOULE / AmountUnit.MOL),
         FormationGibbsFreeEnergy(-394.359, EnergyUnit.KILO_JOULE / AmountUnit.MOL),
     )
-    NICKEL = _create_substance(ChemicalElement(Atoms.get("Ni")), "Ni")
-    NICKEL_OXIDE = _create_substance(
-        ChemicalCompound([Atoms.get("Ni"), Atoms.get("O")]), "NiO"
-    )
-    CALCIUM_OXIDE = _create_substance(
-        ChemicalCompound([Atoms.get("Ca"), Atoms.get("O")], "CaO")
-    )
-    CALCIUM_CARBONATE = _create_substance(
-        ChemicalCompound([Atoms.get("Ca"), Atoms.get("C"), Atoms.get("O") * 3]), "CaCO3"
-    )
