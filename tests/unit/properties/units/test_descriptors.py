@@ -9,6 +9,7 @@ from crdlib.properties.units.units import (
     PressureUnit,
     LengthUnit,
     MassUnit,
+    TimeUnit,
 )
 from crdlib.properties.units.descriptors import (
     Dimension,
@@ -155,19 +156,30 @@ class TestIsInstance(TestUnitDescriptors):
         )
 
 
-class TestCompositeDimensionGet(TestUnitDescriptors):
-    def composite(self):
-        composite = CompositeDimension(
-            numerator=[
-                Dimension(LengthUnit.CENTI_METER) ** 2,
-                Dimension(MassUnit.GRAM),
-            ],
-            denominator=[
-                Dimension(PressureUnit.BAR) ** 3,
-                Dimension(TemperatureUnit.CELCIUS),
-            ],
+class TestCompositeDimension(TestUnitDescriptors):
+    @classmethod
+    def create_composite(cls, numerator, denominator) -> CompositeDimension:
+        return CompositeDimension(
+            map(cls._to_dimension, numerator), map(cls._to_dimension, denominator)
         )
-        return composite
+
+    def composite(self):
+        return self.create_composite(
+            [LengthUnit.CENTI_METER**2, MassUnit.GRAM],
+            [PressureUnit.BAR**3, TemperatureUnit.CELCIUS],
+        )
+
+    @staticmethod
+    def _to_dimension(descriptor: MeasurementUnit | Dimension) -> Dimension:
+        if isinstance(descriptor, MeasurementUnit):
+            return Dimension(descriptor)
+        return descriptor
+
+    def assertDimensions(
+        self, dimensions: list[Dimension], units: list[MeasurementUnit | Dimension]
+    ) -> None:
+        units = list(map(self._to_dimension, units))
+        self.assertEqual(dimensions, units)
 
     def test_get_numerator(self):
         dimension = self.composite().get_numerator(LengthUnit**2)
@@ -188,6 +200,82 @@ class TestCompositeDimensionGet(TestUnitDescriptors):
     def test_get_denominator_default(self):
         dimension = self.composite().get_denominator(PressureUnit, 2)
         self.assertEqual(dimension, 2)
+
+    def test_simplify_non_dimensional(self):
+        composite = self.create_composite([LengthUnit.METER], [LengthUnit.METER])
+        composite.simplify()
+
+        self.assertEqual(composite.numerator, [])
+        self.assertEqual(composite.denominator, [])
+
+    def test_simplify_simple_dimensions(self):
+        composite = self.create_composite(
+            [LengthUnit.METER, TimeUnit.SECOND], [TimeUnit.SECOND]
+        )
+        composite.simplify()
+
+        self.assertEqual(composite.denominator, [])
+        self.assertDimensions(composite.numerator, [LengthUnit.METER])
+
+    def test_simplify_exponent_dimensions(self):
+        composite = self.create_composite(
+            [TemperatureUnit.KELVIN**2], [TemperatureUnit.KELVIN]
+        )
+        composite.simplify()
+
+        self.assertEqual(composite.denominator, [])
+        self.assertDimensions(composite.numerator, [TemperatureUnit.KELVIN])
+
+    def test_simplify_same_numerator_dimensions(self):
+        composite = self.create_composite(
+            [TimeUnit.SECOND, TimeUnit.SECOND], [TemperatureUnit.RANKINE]
+        )
+        composite.simplify()
+
+        self.assertEqual(composite.numerator, [TimeUnit.SECOND**2])
+        self.assertDimensions(composite.denominator, [TemperatureUnit.RANKINE])
+
+    def test_simplify_same_denominator_dimensions(self):
+        composite = self.create_composite(
+            [LengthUnit.FOOT], [MassUnit.GRAM, MassUnit.GRAM]
+        )
+        composite.simplify()
+
+        self.assertDimensions(composite.numerator, [LengthUnit.FOOT])
+        self.assertEqual(composite.denominator, [MassUnit.GRAM**2])
+
+    def test_simplify_aliased_composite_dimension_is_not_converted(self):
+        composite = self.create_composite(
+            [PressureUnit.PASCAL, LengthUnit.METER, TimeUnit.SECOND**2],
+            [MassUnit.KILO_GRAM],
+        )
+        composite.simplify()
+
+        self.assertDimensions(
+            composite.numerator,
+            [
+                PressureUnit.PASCAL,
+                LengthUnit.METER,
+                TimeUnit.SECOND**2,
+            ],
+        )
+        self.assertDimensions(composite.denominator, [MassUnit.KILO_GRAM])
+
+    def test_simplify_negative_exponents_merge(self):
+        composite = self.create_composite(
+            [LengthUnit.FOOT ** (-1)], [LengthUnit.FOOT ** (-2)]
+        )
+        composite.simplify()
+
+        self.assertDimensions(composite.numerator, [LengthUnit.FOOT])
+        self.assertEqual(composite.denominator, [])
+
+    def test_simplify_negative_exponent(self):
+        composite = self.create_composite([], [PressureUnit.BAR ** (-1)])
+        composite.simplify()
+
+        self.assertDimensions(composite.numerator, [PressureUnit.BAR])
+        self.assertEqual(composite.denominator, [])
 
 
 class TestGenericUnitDescriptors(TestCase):
