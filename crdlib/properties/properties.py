@@ -109,23 +109,7 @@ class ExponentPhysicalProperty(AbstractPhysicalProperty):
 
 
 @dataclass
-class CompositePhysicalProperty(AbstractPhysicalProperty):
-    """
-    A physical property with a generic unit descriptor of type `CompositeDimension`
-    """
-
-    def __init__(self, value: float, unit: UnitDescriptor) -> None:
-        self.value = value
-        try:
-            self.unit_descriptor = CompositeDimension.from_descriptor(unit)
-        except WrongUnitDescriptorType:
-            raise WrongUnitDescriptorType(
-                f"cannot instantiate {self.__class__.__name__} with unit: {unit}"
-            )
-
-
-@dataclass
-class AliasedCompositePhysicalProperty(AbstractPhysicalProperty):
+class AliasedPhysicalProperty(AbstractPhysicalProperty):
     """A physical property with an aliased generic unit descriptor."""
 
     base_units_generic_descriptor: ClassVar[GenericUnitDescriptor]
@@ -140,7 +124,7 @@ class AliasedCompositePhysicalProperty(AbstractPhysicalProperty):
                 f"cannot instantiate {self.__class__.__name__} with unit: {unit}"
             )
 
-    def to_base_units(self) -> CompositePhysicalProperty:
+    def to_base_units(self) -> "CompositePhysicalProperty":
         """
         Create a new `CompositePhyicalProperty` from this aliased property by converting
         to composite base units.
@@ -149,6 +133,22 @@ class AliasedCompositePhysicalProperty(AbstractPhysicalProperty):
             value=self.to_unit(self.reference_unit_mapping["alias"]).value,
             unit=self.reference_unit_mapping["composite"],
         )
+
+
+@dataclass
+class CompositePhysicalProperty(AbstractPhysicalProperty):
+    """
+    A physical property with a generic unit descriptor of type `CompositeDimension`
+    """
+
+    def __init__(self, value: float, unit: UnitDescriptor) -> None:
+        self.value = value
+        try:
+            self.unit_descriptor = CompositeDimension.from_descriptor(unit)
+        except WrongUnitDescriptorType:
+            raise WrongUnitDescriptorType(
+                f"cannot instantiate {self.__class__.__name__} with unit: {unit}"
+            )
 
 
 class Temperature(PhysicalProperty):
@@ -175,7 +175,7 @@ class Volume(ExponentPhysicalProperty):
     generic_descriptor = LengthUnit**3
 
 
-class Pressure(AliasedCompositePhysicalProperty):
+class Pressure(AliasedPhysicalProperty):
     generic_descriptor = PressureUnit
     base_units_generic_descriptor = MassUnit / LengthUnit / (TimeUnit**2)
     reference_unit_mapping = {
@@ -184,7 +184,7 @@ class Pressure(AliasedCompositePhysicalProperty):
     }
 
 
-class Energy(AliasedCompositePhysicalProperty):
+class Energy(AliasedPhysicalProperty):
     generic_descriptor = EnergyUnit
     base_units_generic_descriptor = MassUnit * (LengthUnit**2) / (TimeUnit**2)
     reference_unit_mapping = {

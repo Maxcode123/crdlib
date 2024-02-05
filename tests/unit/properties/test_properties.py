@@ -62,7 +62,7 @@ class TestCompositePhysicalProperty(TestCase):
         self.assertAlmostEqual(M2.value, 10 / 1_000 * 24, 2)
 
 
-class TestAliasedCompositePhysicalProperty(TestCase):
+class TestAliasedPhysicalProperty(TestCase):
     def test_to_unit_bar_to_Pa(self):
         P1 = Pressure(2, PressureUnit.BAR)
         P2 = P1.to_unit(PressureUnit.PASCAL)
