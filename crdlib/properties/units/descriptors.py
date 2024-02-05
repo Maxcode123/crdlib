@@ -559,6 +559,37 @@ class CompositeDimension:
                 return d
         return default
 
+    def simplify(self) -> None:
+        """
+        Simplify the composite by merging common dimensions.
+        e.g.
+        `bar^(-2) / K^(-1)` becomes `K / (bar^2)`,
+        `Pa * m * Pa / s` becomes `(Pa^2) * m / s`
+        """
+        exponents: dict[MeasurementUnit, float] = {}
+        for n in self.numerator:
+            if n.unit in exponents:
+                exponents[n.unit] += n.power
+            else:
+                exponents[n.unit] = n.power
+
+        for d in self.denominator:
+            if d.unit in exponents:
+                exponents[d.unit] -= d.power
+            else:
+                exponents[d.unit] = 0 - d.power
+
+        numerator = []
+        denominator = []
+        for unit, exponent in exponents.items():
+            if exponent > 0:
+                numerator.append(Dimension(unit) ** exponent)
+            elif exponent < 0:
+                denominator.append(Dimension(unit) ** abs(exponent))
+
+        self.numerator = numerator
+        self.denominator = denominator
+
     def __mul__(self, descriptor: "UnitDescriptor") -> "CompositeDimension":
         numerator = self.numerator.copy()
         denominator = self.denominator.copy()

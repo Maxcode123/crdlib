@@ -6,9 +6,17 @@ from crdlib.properties.units.units import (
     LengthUnit,
     MassUnit,
     TimeUnit,
+    EnergyUnit,
+    AmountUnit,
 )
 from crdlib.properties.units.descriptors import Dimension
-from crdlib.properties.properties import Temperature, Pressure, Volume, MassRate
+from crdlib.properties.properties import (
+    Temperature,
+    Pressure,
+    Volume,
+    MassRate,
+    MolarEnergy,
+)
 from crdlib.properties.exceptions import InvalidUnitConversion
 
 
@@ -62,7 +70,7 @@ class TestCompositePhysicalProperty(TestCase):
         self.assertAlmostEqual(M2.value, 10 / 1_000 * 24, 2)
 
 
-class TestAliasedCompositePhysicalProperty(TestCase):
+class TestAliasedPhysicalProperty(TestCase):
     def test_to_unit_bar_to_Pa(self):
         P1 = Pressure(2, PressureUnit.BAR)
         P2 = P1.to_unit(PressureUnit.PASCAL)
@@ -90,6 +98,24 @@ class TestAliasedCompositePhysicalProperty(TestCase):
             MassUnit.KILO_GRAM / LengthUnit.METER / (TimeUnit.SECOND**2),
         )
         self.assertEqual(P2.value, 200_000)
+
+
+class TestAliasedCompositePhysicalProperty(TestCase):
+    def test_to_base_units_composite_value(self):
+        E = MolarEnergy(10, EnergyUnit.KILO_JOULE / AmountUnit.MOL)
+
+        self.assertEqual(E.to_base_units().value, 10_000)
+
+    def test_to_base_units_composite_dimensions(self):
+        E = MolarEnergy(10, EnergyUnit.KILO_CALORIE / AmountUnit.KILO_MOL)
+
+        self.assertEqual(
+            E.to_base_units().unit_descriptor,
+            MassUnit.KILO_GRAM
+            * (LengthUnit.METER**2)
+            / (TimeUnit.SECOND**2)
+            / AmountUnit.MOL,
+        )
 
 
 if __name__ == "__main__":
