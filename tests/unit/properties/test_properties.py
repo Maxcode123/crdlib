@@ -6,9 +6,17 @@ from crdlib.properties.units.units import (
     LengthUnit,
     MassUnit,
     TimeUnit,
+    EnergyUnit,
+    AmountUnit,
 )
 from crdlib.properties.units.descriptors import Dimension
-from crdlib.properties.properties import Temperature, Pressure, Volume, MassRate
+from crdlib.properties.properties import (
+    Temperature,
+    Pressure,
+    Volume,
+    MassRate,
+    MolarEnergy,
+)
 from crdlib.properties.exceptions import InvalidUnitConversion
 
 
@@ -90,6 +98,24 @@ class TestAliasedPhysicalProperty(TestCase):
             MassUnit.KILO_GRAM / LengthUnit.METER / (TimeUnit.SECOND**2),
         )
         self.assertEqual(P2.value, 200_000)
+
+
+class TestAliasedCompositePhysicalProperty(TestCase):
+    def test_to_base_units_composite_value(self):
+        E = MolarEnergy(10, EnergyUnit.KILO_JOULE / AmountUnit.MOL)
+
+        self.assertEqual(E.to_base_units().value, 10_000)
+
+    def test_to_base_units_composite_dimensions(self):
+        E = MolarEnergy(10, EnergyUnit.KILO_CALORIE / AmountUnit.KILO_MOL)
+
+        self.assertEqual(
+            E.to_base_units().unit_descriptor,
+            MassUnit.KILO_GRAM
+            * (LengthUnit.METER**2)
+            / (TimeUnit.SECOND**2)
+            / AmountUnit.MOL,
+        )
 
 
 if __name__ == "__main__":

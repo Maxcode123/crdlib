@@ -151,6 +151,36 @@ class CompositePhysicalProperty(AbstractPhysicalProperty):
             )
 
 
+@dataclass
+class AliasedCompositePhysicalProperty(AbstractPhysicalProperty):
+    """
+    A physical property with a generic unit descriptor of type `CompositeDimension`
+    that includes `AliasedMeasurementUnit`s.
+    """
+
+    base_units_generic_descriptor: ClassVar[GenericUnitDescriptor]
+    reference_unit_mapping: ClassVar[dict[str, UnitDescriptor]]
+
+    def __init__(self, value: float, unit: UnitDescriptor) -> None:
+        self.value = value
+        try:
+            self.unit_descriptor = CompositeDimension.from_descriptor(unit)
+        except WrongUnitDescriptorType:
+            raise WrongUnitDescriptorType(
+                f"cannot instantiate {self.__class__.__name__} with unit: {unit}"
+            )
+
+    def to_base_units(self) -> "CompositePhysicalProperty":
+        """
+        Create a new `CompositePhyicalProperty` from this aliased property by converting
+        to composite base units.
+        """
+        return CompositePhysicalProperty(
+            value=self.to_unit(self.reference_unit_mapping["alias"]).value,
+            unit=self.reference_unit_mapping["composite"],
+        )
+
+
 class Temperature(PhysicalProperty):
     generic_descriptor = TemperatureUnit
 
@@ -203,8 +233,13 @@ class MolarVolume(CompositePhysicalProperty):
     generic_descriptor = (LengthUnit**3) / AmountUnit
 
 
-class MolarEnergy(CompositePhysicalProperty):
+class MolarEnergy(AliasedCompositePhysicalProperty):
     generic_descriptor = EnergyUnit / AmountUnit
+    base_units_generic_descriptor = Energy.base_units_generic_descriptor / AmountUnit
+    reference_unit_mapping = {
+        "alias": Energy.reference_unit_mapping["alias"] / AmountUnit.MOL,
+        "composite": Energy.reference_unit_mapping["composite"] / AmountUnit.MOL,
+    }
 
 
 FormationEnthalpy: TypeAlias = MolarEnergy
@@ -217,8 +252,16 @@ class GasConstant(CompositePhysicalProperty):
     )
 
 
-class ThermalCapacity(CompositePhysicalProperty):
+class ThermalCapacity(AliasedCompositePhysicalProperty):
     generic_descriptor = EnergyUnit / AmountUnit / TemperatureUnit
+    base_units_generic_descriptor = (
+        MolarEnergy.base_units_generic_descriptor / TemperatureUnit
+    )
+    reference_unit_mapping = {
+        "alias": MolarEnergy.reference_unit_mapping["alias"] / TemperatureUnit.KELVIN,
+        "composite": MolarEnergy.reference_unit_mapping["composite"]
+        / TemperatureUnit.KELVIN,
+    }
 
 
 class VolumetricRate(PhysicalProperty):
