@@ -1,7 +1,7 @@
 from crdlib.properties.units.descriptors import (
     MeasurementUnit,
-    MeasurementUnitType,
     AliasedMeasurementUnit,
+    GenericUnitDescriptor,
 )
 
 
@@ -69,7 +69,7 @@ class EnergyUnit(AliasedMeasurementUnit):
     BTU = "Btu"
 
 
-SI_UNITS: dict[MeasurementUnitType, MeasurementUnit] = {
+SI_UNITS: dict[GenericUnitDescriptor, MeasurementUnit] = {
     TemperatureUnit: TemperatureUnit.KELVIN,
     LengthUnit: LengthUnit.METER,
     MassUnit: MassUnit.KILO_GRAM,

@@ -14,6 +14,7 @@ from crdlib.properties.properties import (
     Temperature,
     Pressure,
     Volume,
+    Length,
     MassRate,
     MolarEnergy,
 )
@@ -40,6 +41,18 @@ class TestPhysicalProperty(TestCase):
         F = Temperature.from_physical_property(K, TemperatureUnit.FAHRENHEIT)
         self.assertAlmostEqual(F.value, (500 - 273.15) * 1.8 + 32, 2)
 
+    def test_temperature_to_si_from_C(self):
+        C = Temperature(0, TemperatureUnit.CELCIUS)
+        K = C.to_si()
+        self.assertEqual(K.value, 273.15)
+        self.assertEqual(K.unit_descriptor, TemperatureUnit.KELVIN)
+
+    def test_length_to_si_from_millimeters(self):
+        mm = Length(2_000, LengthUnit.MILLI_METER)
+        m = mm.to_si()
+        self.assertEqual(m.value, 2)
+        self.assertEqual(m.unit_descriptor, LengthUnit.METER)
+
 
 class TestExponentPhysicalProperty(TestCase):
     def test_to_unit_m3_to_cm3(self):
@@ -62,12 +75,26 @@ class TestExponentPhysicalProperty(TestCase):
         with self.assertRaises(InvalidUnitConversion):
             V1.to_unit(Dimension(PressureUnit.PSI))
 
+    def test_to_si(self):
+        V1 = Volume(5_000, LengthUnit.CENTI_METER**3)
+        V2 = V1.to_si()
+
+        self.assertAlmostEqual(V2.value, 0.005)
+        self.assertEqual(V2.unit_descriptor, LengthUnit.METER**3)
+
 
 class TestCompositePhysicalProperty(TestCase):
     def test_to_unit(self):
         M1 = MassRate(10, Dimension(MassUnit.KILO_GRAM) / Dimension(TimeUnit.HOUR))
         M2 = M1.to_unit(Dimension(MassUnit.METRIC_TONNE) / Dimension(TimeUnit.DAY))
         self.assertAlmostEqual(M2.value, 10 / 1_000 * 24, 2)
+
+    def test_to_si(self):
+        M1 = MassRate(10, MassUnit.METRIC_TONNE / TimeUnit.HOUR)
+        M2 = M1.to_si()
+
+        self.assertAlmostEqual(M2.value, 10 * 1_000 / 60 / 60)
+        self.assertEqual(M2.unit_descriptor, MassUnit.KILO_GRAM / TimeUnit.SECOND)
 
 
 class TestAliasedPhysicalProperty(TestCase):
