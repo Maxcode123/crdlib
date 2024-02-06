@@ -178,6 +178,15 @@ class ChemicalSubstances(Enum, metaclass=ChemicalSubstancesMeta):
         FormationEnthalpy(0, EnergyUnit.KILO_JOULE / AmountUnit.MOL),
         FormationGibbsFreeEnergy(0, EnergyUnit.KILO_JOULE / AmountUnit.MOL),
     )
+    OXYGEN = _create_substance(
+        ChemicalElement(Atoms.get("O"), 2),
+        "O2",
+        Temperature(154.58, TemperatureUnit.KELVIN),
+        Pressure(50.43, PressureUnit.BAR),
+        MolarVolume(0.0734, (LengthUnit.METER**3) / AmountUnit.KILO_MOL),
+        FormationEnthalpy(0, EnergyUnit.KILO_JOULE / AmountUnit.MOL),
+        FormationGibbsFreeEnergy(0, EnergyUnit.KILO_JOULE / AmountUnit.MOL),
+    )
     WATER = _create_substance(
         ChemicalCompound([Atoms.get("H") * 2, Atoms.get("O")]),
         "H2O",
