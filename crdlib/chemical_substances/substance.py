@@ -78,6 +78,10 @@ class ChemicalReactionFactors:
     participants: List["ChemicalReactionParticipant"]
 
     def __init__(self, factors: Iterable[ChemicalReactionFactor]) -> None:
+        if len(factors) == 0:
+            raise ValueError(
+                "cannot create ChemicalReactionFactors from empty iterable."
+            )
         _factors = []
         for f in factors:
             if isinstance(f, (ChemicalCompound, ChemicalElement)):
