@@ -158,7 +158,10 @@ class ChemicalSubstance(metaclass=ABCMeta):
         return self * coeff
 
     def __add__(self, other: ChemicalReactionFactor) -> ChemicalReactionFactors:
-        if isinstance(other, (Atom, ChemicalElement, ChemicalCompound)):
+        if isinstance(
+            other,
+            (Atom, ChemicalElement, ChemicalCompound, ChemicalReactionParticipant),
+        ):
             return ChemicalReactionFactors(
                 [ChemicalReactionParticipant(self, 1), other]
             )

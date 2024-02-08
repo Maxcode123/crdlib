@@ -154,6 +154,13 @@ class TestChemicalReactionFactors(TestCase):
         self.assertTrue(isinstance(factors, ChemicalReactionFactors))
         self.assertEqual(len(factors.participants), 2)
 
+    def test_element_plus_participant_creates_factors(self):
+        factors = ChemicalElement(Atoms["S"]) + ChemicalReactionParticipant(
+            ChemicalElement(Atoms["H"])
+        )
+        self.assertTrue(isinstance(factors, ChemicalReactionFactors))
+        self.assertEqual(len(factors.participants), 2)
+
     @parameterized.expand(invalid_factors)
     def test_invalid_element_addition_raises(self, _, factor):
         with self.assertRaises(InvalidChemicalReactionFactorBinaryOperation):
