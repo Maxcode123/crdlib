@@ -154,6 +154,9 @@ class ChemicalSubstance(metaclass=ABCMeta):
             )
         return ChemicalReactionParticipant(self, coeff)
 
+    def __rmul__(self, coeff: int) -> "ChemicalReactionParticipant":
+        return self * coeff
+
     def __add__(self, other: ChemicalReactionFactor) -> ChemicalReactionFactors:
         if isinstance(other, (Atom, ChemicalElement, ChemicalCompound)):
             return ChemicalReactionFactors(

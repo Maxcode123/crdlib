@@ -163,6 +163,10 @@ class TestChemicalReactionFactors(TestCase):
         participant = ChemicalElement(Atoms["O"]) * 3
         self.assertEqual(participant.stoichiometric_coefficient, 3)
 
+    def test_element_right_multiplication_creates_participant(self):
+        participant = 3 * ChemicalElement(Atoms["Na"])
+        self.assertEqual(participant.stoichiometric_coefficient, 3)
+
     @parameterized.expand(invalid_factors)
     def test_invalid_element_multiplication_raises(self, _, factor):
         with self.assertRaises(InvalidChemicalReactionFactorBinaryOperation):
