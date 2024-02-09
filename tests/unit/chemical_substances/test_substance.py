@@ -206,6 +206,29 @@ class TestChemicalReactionFactors(TestCase):
         with self.assertRaises(InvalidChemicalReactionFactorBinaryOperation):
             ChemicalReactionFactors([ChemicalElement(Atoms["Si"])]) + factor
 
+    def test_create_from_factors(self):
+        factors = ChemicalReactionFactors.create(
+            ChemicalReactionFactors([ChemicalElement(Atoms["H"])])
+        )
+        self.assertEqual(len(factors.participants), 1)
+        self.assertEqual(factors.participants[0].substance, ChemicalElement(Atoms["H"]))
+
+    def test_create_from_participant(self):
+        factors = ChemicalReactionFactors.create(
+            ChemicalReactionParticipant(ChemicalElement(Atoms["He"]))
+        )
+        self.assertEqual(len(factors.participants), 1)
+        self.assertEqual(
+            factors.participants[0].substance, ChemicalElement(Atoms["He"])
+        )
+
+    def test_create_from_substance(self):
+        factors = ChemicalReactionFactors.create(ChemicalElement(Atoms["Ar"]))
+        self.assertEqual(len(factors.participants), 1)
+        self.assertEqual(
+            factors.participants[0].substance, ChemicalElement(Atoms["Ar"])
+        )
+
 
 if __name__ == "__main__":
     main()

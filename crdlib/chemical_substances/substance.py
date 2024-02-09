@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import Iterable, Optional, Union, List, Protocol
 from dataclasses import dataclass
 from abc import ABCMeta
@@ -76,6 +77,24 @@ class Atom:
 @dataclass
 class ChemicalReactionFactors:
     participants: List["ChemicalReactionParticipant"]
+
+    @classmethod
+    def create(
+        cls,
+        factors: ChemicalReactionFactors
+        | ChemicalReactionParticipant
+        | ChemicalSubstance,
+    ) -> ChemicalReactionFactors:
+        """
+        Create a ChemicalReactionFactors object.
+        """
+        if isinstance(factors, ChemicalReactionFactors):
+            return factors
+        elif isinstance(factors, ChemicalReactionParticipant):
+            return ChemicalReactionFactors([factors])
+        elif isinstance(factors, ChemicalSubstance):
+            return ChemicalReactionFactors([ChemicalReactionParticipant(factors)])
+        raise TypeError(f"cannot create ChemicalReactionFactors from {factors}")
 
     def __init__(self, factors: Iterable[ChemicalReactionFactor]) -> None:
         if len(factors) == 0:
