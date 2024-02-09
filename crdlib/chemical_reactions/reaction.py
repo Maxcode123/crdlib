@@ -1,9 +1,15 @@
 from dataclasses import dataclass
 from math import exp
+from typing import Optional
 
-from crdlib.chemical_substances.substance import ChemicalReactionFactors
+from crdlib.chemical_substances.substance import (
+    ChemicalReactionFactors,
+    ChemicalReactionParticipant,
+    ChemicalSubstance,
+)
 from crdlib.equations.equation import Term
 from crdlib.properties.properties import Temperature
+from crdlib.properties.units.units import TemperatureUnit
 from crdlib.properties.constants import GLOBAL_GAS_CONSTANT
 
 
@@ -11,43 +17,40 @@ from crdlib.properties.constants import GLOBAL_GAS_CONSTANT
 class ChemicalReaction:
     reactants: ChemicalReactionFactors
     products: ChemicalReactionFactors
-    reaction_rate: Term
+    reaction_rate: Optional[Term] = None
+    reference_temperature = Temperature(25, TemperatureUnit.CELCIUS)
 
-    def equilibrium_constant(self, temperature: Temperature) -> float:
-        return self.calculate_equilibrium_constant(
-            temperature, self.reactants, self.products
-        )
+    def __init__(
+        self,
+        reactants: ChemicalReactionFactors
+        | ChemicalReactionParticipant
+        | ChemicalSubstance,
+        products: ChemicalReactionFactors
+        | ChemicalReactionParticipant
+        | ChemicalSubstance,
+    ) -> None:
+        self.reactants = ChemicalReactionFactors.create(reactants)
+        self.products = ChemicalReactionFactors.create(products)
 
-    @classmethod
-    def calculate_equilibrium_constant(
-        cls,
-        temperature: Temperature,
-        reactants: ChemicalReactionFactors,
-        products: ChemicalReactionFactors,
-    ) -> float:
+    def calculate_equilibrium_constant(self, temperature: Temperature) -> float:
         pass
 
-    def standard_gibbs_free_energy_diff(self) -> float:
-        return self._standard_property_diff("gibbs_free_energy")
+    def standard_gibbs_free_energy_change(self) -> float:
+        """
+        In SI base units: kg / m^2 / s^2 / mol
+        """
+        return self._standard_property_change("gibbs_free_energy")
 
-    def standard_enthalpy_diff(self) -> float:
-        return self._standard_property_diff("enthalpy")
+    def standard_enthalpy_change(self) -> float:
+        """
+        In SI base units: kg / m^2 / s^2 / mol
+        """
+        return self._standard_property_change("enthalpy")
 
-    def _standard_property_diff(self, property: str) -> float:
-        return self.__class__._standard_property_diff(
-            self.reactants, self.products, property
-        )
-
-    @classmethod
-    def _standard_property_diff(
-        cls,
-        reactans: ChemicalReactionFactors,
-        products: ChemicalReactionFactors,
-        property: str,
-    ) -> float:
-        return cls._standard_property_sum(
-            reactans, property
-        ) - cls._standard_property_sum(products, property)
+    def _standard_property_change(self, property: str) -> float:
+        return self._standard_property_sum(
+            self.reactants, property
+        ) - self._standard_property_sum(self.products, property)
 
     @staticmethod
     def _standard_property_sum(
@@ -55,10 +58,16 @@ class ChemicalReaction:
     ) -> float:
         prop = 0
         for p in factors.participants:
-            prop += p.stoichiometric_coefficient * getattr(
-                p.substance.standard_formation_properties, property
+            prop += (
+                p.stoichiometric_coefficient
+                * getattr(p.substance.standard_formation_properties, property)
+                .to_si()
+                .value
             )
         return prop
+
+    def _gibbs_free_energy_factor(self) -> float:
+        GLOBAL_GAS_CONSTANT.to_si().value * self.standard_gibbs_free_energy_change()
 
     @staticmethod
     def _calculate_equilibrium_constant(
